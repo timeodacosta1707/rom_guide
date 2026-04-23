@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ['localhost'],
+  allowedDevOrigins: ['dako', 'dako:3000', 'localhost'],
   turbopack: {},
 };
 
