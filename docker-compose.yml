@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: rom_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: rom_admin
+      POSTGRES_PASSWORD: rom_password
+      POSTGRES_DB: rom_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rom_network
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rom_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=rom_admin
+      - DB_PASSWORD=rom_password
+      - DB_NAME=rom_db
+    depends_on:
+      - postgres
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - rom_network
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: rom_frontend
+    restart: always
+    ports:
+      - "3001:3000" 
+    environment:
+      - NEXT_PUBLIC_API_URL=http://dako:3000 
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
+      - /usr/src/app/.next
+    networks:
+      - rom_network
+
+volumes:
+  postgres_data:
+
+networks:
+  rom_network:
+    driver: bridge
