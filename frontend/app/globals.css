@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* Personnalisation de la barre de défilement (Scrollbar) pour la colonne de gauche */
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
 }
@@ -8,9 +7,9 @@
   background: transparent;
 }
 .scrollbar-thumb-slate-700::-webkit-scrollbar-thumb {
-  background-color: #334155; /* Couleur slate-700 */
+  background-color: #334155;
   border-radius: 10px;
 }
 .scrollbar-thumb-slate-700::-webkit-scrollbar-thumb:hover {
-  background-color: #475569; /* Couleur slate-600 au survol */
+  background-color: #475569;
 }

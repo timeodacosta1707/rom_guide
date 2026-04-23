@@ -1,9 +1,8 @@
 'use client';
 
 import { Pencil, Check, SquarePen, Trash2, X, ArrowUp, MapPin, Play, ChevronDown, ChevronRight, List } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-// --- INTERFACES ---
 interface GameClass { id: number; name: string; iconUrl?: string; }
 interface Race { id: number; name: string; availableClasses: GameClass[]; }
 interface Skill {
@@ -84,14 +83,12 @@ export default function Home() {
 	const [activeMapModal, setActiveMapModal] = useState<{ url: string, name: string } | null>(null);
 	const [showScrollTop, setShowScrollTop] = useState(false);
 
-	// État pour le menu sommaire sur Mobile
 	const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
-	// CHARGEMENT DEPUIS LE LOCALSTORAGE AU DÉMARRAGE
 	useEffect(() => {
 		const loadData = async () => {
 			try {
-				const res = await fetch('http://dako:3000/races');
+				const res = await fetch(`${process.env.API_URL}/races`);
 				const data = await res.json();
 				setRaces(data);
 
@@ -115,7 +112,6 @@ export default function Home() {
 		loadData();
 	}, []);
 
-	// SAUVEGARDE AUTOMATIQUE DANS LE LOCALSTORAGE
 	useEffect(() => {
 		if (races.length === 0) return;
 		const prefs = {
@@ -129,13 +125,11 @@ export default function Home() {
 		localStorage.setItem('rom_build_prefs', JSON.stringify(prefs));
 	}, [selectedRace, primaryClass, secondaryClass, viewMode, sortLevel, filterCategory, races.length]);
 
-	// Écouteur pour le bouton de scroll
 	useEffect(() => {
 		const handleScroll = () => {
 			if (window.scrollY > 1200) setShowScrollTop(true);
 			else setShowScrollTop(false);
 
-			// On ferme le menu si l'utilisateur commence à scroller pour plus de clarté
 			if (isMobileNavOpen) setIsMobileNavOpen(false);
 		};
 		window.addEventListener('scroll', handleScroll);
@@ -144,7 +138,6 @@ export default function Home() {
 
 	const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-	// FONCTION POUR SCROLLER JUSQU'À UNE CATÉGORIE
 	const scrollToSection = (id: string) => {
 		const element = document.getElementById(id);
 		if (element) {
@@ -154,7 +147,7 @@ export default function Home() {
 
 			window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
 		}
-		setIsMobileNavOpen(false); // On ferme le menu mobile après le clic
+		setIsMobileNavOpen(false);
 	};
 
 	useEffect(() => {
@@ -165,7 +158,7 @@ export default function Home() {
 		const fetchSkills = async () => {
 			setLoadingSkills(true);
 			try {
-				let url = `http://dako:3000/skills/build?primary=${primaryClass.name}`;
+				let url = `${process.env.API_URL}/skills/build?primary=${primaryClass.name}`;
 				if (secondaryClass) url += `&secondary=${secondaryClass.name}`;
 				const res = await fetch(url);
 				const data = await res.json();
@@ -317,7 +310,6 @@ export default function Home() {
 	const invalidRuleIds = getInvalidRuleIds(activeRules);
 	const unselectedRules = AVAILABLE_RULES.filter(def => !activeRules.some(r => r.id === def.id) && !invalidRuleIds.has(def.id));
 
-	// --- LE COMPOSANT SKILLROW ---
 	const SkillRow = ({ skill, highlightClass }: { skill: Skill, highlightClass?: string }) => {
 		const hasSetInfo = skill.description.includes('[Set : ');
 		let cleanDescription = skill.description;
@@ -462,9 +454,6 @@ export default function Home() {
 		<main className="min-h-[100dvh] bg-slate-950 text-white p-4 lg:p-8 font-sans pb-28 lg:pb-8 relative">
 			<div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
 
-				{/* =========================================================================
-                    COLONNE GAUCHE (Configuration & Sommaire sur PC)
-                ========================================================================= */}
 				<div className="hidden lg:block lg:w-1/4">
 					<div className="sticky top-8 space-y-6 h-[calc(100vh-4rem)] overflow-y-auto pr-2 pb-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
 
@@ -577,14 +566,10 @@ export default function Home() {
 					</div>
 				</div>
 
-				{/* =========================================================================
-                    COLONNE DROITE : LE GRIMOIRE
-                ========================================================================= */}
 				<div className="w-full lg:w-3/4">
 					{primaryClass ? (
 						<div className="bg-slate-900 rounded-xl border border-slate-800 shadow-xl relative">
 
-							{/* EN-TÊTE (Titre du Build) - NON STICKY */}
 							<div className="p-4 md:p-6 pb-2 md:pb-4 flex items-center gap-3 bg-slate-900 rounded-t-xl">
 								{primaryClass.iconUrl && <img src={primaryClass.iconUrl} alt={primaryClass.name} className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-slate-900 border border-slate-600 shadow-lg" />}
 								<h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
@@ -598,7 +583,6 @@ export default function Home() {
 								</h2>
 							</div>
 
-							{/* BARRE DE FILTRES ET NAVIGATION - STICKY TOP */}
 							<div className="sticky top-0 z-30 px-4 pb-4 md:px-6 md:pb-6 pt-2 bg-slate-900/95 backdrop-blur-md border-b border-slate-700 shadow-lg">
 
 								<div className="flex flex-wrap gap-2 md:gap-4 bg-slate-800/60 p-2 md:p-3 rounded-lg border border-slate-700/50">
@@ -688,7 +672,6 @@ export default function Home() {
 								)}
 							</div>
 
-							{/* LISTE DES SORTS */}
 							{loadingSkills ? (
 								<div className="p-12 text-center text-blue-400 animate-pulse font-semibold">Recherche dans le grimoire...</div>
 							) : (
@@ -769,7 +752,6 @@ export default function Home() {
 				</div>
 			</div>
 
-			{/* BOUTON REMONTER (Visible uniquement sur PC ou si on scroll loin) */}
 			<div className="fixed bottom-6 right-4 md:bottom-18 md:right-8 z-40 md:flex flex-col gap-3 items-end">
 				<button
 					onClick={scrollToTop}
@@ -780,13 +762,11 @@ export default function Home() {
 				</button>
 			</div>
 
-			{/* NOUVEAU SYSTÈME DE FAB MOBILE (Animation de convergence au centre) */}
 			{isFabOpen && <div className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm" onClick={() => setIsFabOpen(false)} />}
 			{isMobileNavOpen && <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setIsMobileNavOpen(false)} />}
 
 			<div className="fixed bottom-18 left-1/2 -translate-x-1/2 z-50 lg:hidden w-full flex justify-center">
 
-				{/* BOUTON DE CONFIGURATION (LE CRAYON) */}
 				<div className={`absolute flex items-center justify-center transition-all duration-300 ease-out ${isMobileNavOpen ? 'opacity-0 scale-50 pointer-events-none translate-x-0' : (primaryClass && viewMode === 'grouped' && !isFabOpen ? '-translate-x-[36px]' : 'translate-x-0')}`}>
 					<div className="relative flex items-center justify-center">
 						<button onClick={handleReset} disabled={!selectedRace} className={`absolute w-12 h-12 rounded-full bg-red-600 border-2 border-red-400 text-white shadow-lg flex items-center justify-center transition-all duration-300 ease-out z-40 disabled:opacity-0 disabled:pointer-events-none ${isFabOpen ? '-translate-x-[90px] opacity-100 scale-100' : 'translate-x-0 opacity-0 scale-50 pointer-events-none'}`}>
@@ -807,12 +787,10 @@ export default function Home() {
 					</div>
 				</div>
 
-				{/* BOUTON DU SOMMAIRE (Visible uniquement en vue Par Catégorie) */}
 				{primaryClass && viewMode === 'grouped' && (
 					<div className={`absolute flex items-center justify-center transition-all duration-300 ease-out ${isFabOpen ? 'opacity-0 scale-50 pointer-events-none translate-x-0' : (isMobileNavOpen ? 'translate-x-0' : 'translate-x-[36px]')}`}>
 						<div className="relative flex items-center justify-center">
 
-							{/* Le Menu Ouvert */}
 							{isMobileNavOpen && (
 								<div className="absolute bottom-[calc(100%+16px)] left-1/2 -translate-x-1/2 w-64 bg-slate-900 border border-slate-700 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.8)] p-4 animate-fadeIn z-50 origin-bottom">
 									<h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3 text-center">Aller à la section</h3>
@@ -839,7 +817,6 @@ export default function Home() {
 				)}
 			</div>
 
-			{/* MODALES DE SÉLECTION (Race, Classe 1, Classe 2) */}
 			{activeModal && (
 				<div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fadeIn" onClick={() => setActiveModal(null)}>
 					<div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
@@ -877,7 +854,6 @@ export default function Home() {
 				</div>
 			)}
 
-			{/* MODALE DE CARTE (Mobile & PC) */}
 			{activeMapModal && (
 				<div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn" onClick={() => setActiveMapModal(null)}>
 					<div className="relative w-full max-w-4xl flex flex-col items-center animate-scaleIn" onClick={(e) => e.stopPropagation()}>
