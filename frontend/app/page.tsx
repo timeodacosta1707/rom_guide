@@ -88,7 +88,7 @@ export default function Home() {
 	useEffect(() => {
 		const loadData = async () => {
 			try {
-				const res = await fetch(`${process.env.API_URL}/races`);
+				const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/races`);
 				const data = await res.json();
 				setRaces(data);
 
@@ -158,7 +158,7 @@ export default function Home() {
 		const fetchSkills = async () => {
 			setLoadingSkills(true);
 			try {
-				let url = `${process.env.API_URL}/skills/build?primary=${primaryClass.name}`;
+				let url = `${process.env.NEXT_PUBLIC_API_URL}/skills/build?primary=${primaryClass.name}`;
 				if (secondaryClass) url += `&secondary=${secondaryClass.name}`;
 				const res = await fetch(url);
 				const data = await res.json();
